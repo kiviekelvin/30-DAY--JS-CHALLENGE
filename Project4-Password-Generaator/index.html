@@ -54,8 +54,8 @@ function copyPassword() {
                 copyMessage.style.opacity = "0";
                 setTimeout(() => {
                     copyMessage.style.display = "none";
-                }, 300); // Hide after transition
-            }, 1500); // Show for 1.5 seconds
+                }, 300);
+            }, 1500); 
         })
         .catch(err => console.error("Failed to copy: ", err));
 }
