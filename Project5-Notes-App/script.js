@@ -3,47 +3,58 @@ const createBtn = document.querySelector(".btn");
 
 // Load saved notes from localStorage
 function showNotes() {
-    const savedNotes = localStorage.getItem("notes");
-    if (savedNotes) {
-        notesContainer.innerHTML = savedNotes;
-    }
+    notesContainer.innerHTML = localStorage.getItem("notes") || "";
+
+    // Reattach delete button event listeners after loading from localStorage
+    const deleteBtns = notesContainer.querySelectorAll(".delete-btn");
+    deleteBtns.forEach(btn => {
+        btn.addEventListener("click", deleteNote);
+    });
 }
 showNotes();
 
-// Function to update localStorage
-function updateStorage() {
+// Function to update localStorage with the current state of the notes container
+const updateStorage = () => {
     localStorage.setItem("notes", notesContainer.innerHTML);
-}
+};
 
-// Create new note
-createBtn.addEventListener("click", () => {
-    let inputBox = document.createElement("p");
-    let img = document.createElement("img");
+// Create a new note
+const createNote = () => {
+    const note = document.createElement("p");
+    note.className = "input-box";
+    note.setAttribute("contenteditable", "true");
+
+    const deleteBtn = document.createElement("img");
+    deleteBtn.src = "images/delete.png";
+    deleteBtn.className = "delete-btn";
+
+    note.appendChild(deleteBtn);
+    notesContainer.appendChild(note);
     
-    inputBox.className = "input-box";
-    inputBox.setAttribute("contenteditable", "true");
-    img.src = "images/delete.png";
-
-    inputBox.appendChild(img);
-    notesContainer.appendChild(inputBox);
-
-    // Save content on keyup
-    inputBox.addEventListener("keyup", updateStorage);
     updateStorage();
-});
 
-// Delete note when clicking the delete icon
-notesContainer.addEventListener("click", function (e) {
-    if (e.target.tagName === "IMG") {
-        e.target.parentElement.remove();
-        updateStorage();
-    }
-});
+    // Reattach event listener to the new delete button
+    deleteBtn.addEventListener("click", deleteNote);
+};
 
-// Prevent Enter key from creating a new paragraph
-document.addEventListener("keydown", event => {
-    if (event.key === "Enter") {
+// Handle note deletion (remove both from DOM and localStorage)
+const deleteNote = (e) => {
+    const note = e.target.parentElement;
+    note.remove(); // Remove note from DOM
+    
+    updateStorage(); // Update localStorage after removal
+};
+
+// Save edits to localStorage
+notesContainer.addEventListener("input", updateStorage);
+
+// Prevent Enter from creating new paragraphs
+document.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
         document.execCommand("insertLineBreak");
-        event.preventDefault();
+        e.preventDefault();
     }
 });
+
+// Add new note on button click
+createBtn.addEventListener("click", createNote);
